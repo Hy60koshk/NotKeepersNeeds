@@ -1,43 +1,42 @@
-﻿using System;
-using Harmony;
+﻿using Harmony;
+using UnityEngine;
 
 namespace NotKeepersNeeds {
-	/*[HarmonyPatch(typeof(PlayerComponent))]
+	[HarmonyPatch(typeof(PlayerComponent))]
 	[HarmonyPatch("Update")]
 	internal class PlayerComponent_Update_Patcher {
 
-		[HarmonyPrefix]
-		public static bool Prefix(PlayerComponent __instance) {
+		[HarmonyPostfix]
+		public static void Postfix(PlayerComponent __instance) {
 			Config.Options opts = Config.GetOptions();
-			WorldGameObject player = MainGame.me.player;
 
-			if (player.hp != opts.SavedHP) {
-				float mult = player.hp > opts.SavedHP ? opts.RegenMult : opts.DmgMult;
-				float newhp = opts.SavedHP - (opts.SavedHP - player.hp) * mult;
-				player.hp = newhp;
-				opts.SavedHP = newhp;
+			if (opts.HealthRegen) {
+				WorldGameObject player = MainGame.me.player;
+				float curhp = player.hp;
+				if (curhp > 0 && curhp < 100 && (opts.HealIfTired || player.energy > 10)) {
+					curhp += opts.HealthRegenPerSecond * Time.deltaTime;
+					player.hp = curhp < 100 ? curhp : 100;
+				}
+				/*if (player.energy != opts.SavedEnergy) {
+					float mult = player.energy > opts.SavedEnergy ? opts.EnergyReplenMult : opts.EnergyDrainMult;
+					float newenergy = opts.SavedEnergy - (opts.SavedEnergy - player.energy) * mult;
+					player.energy = newenergy;
+					opts.SavedEnergy = newenergy;
+				}*/
 			}
-			/*if (player.energy != opts.SavedEnergy) {
-				float mult = player.energy > opts.SavedEnergy ? opts.EnergyReplenMult : opts.EnergyDrainMult;
-				float newenergy = opts.SavedEnergy - (opts.SavedEnergy - player.energy) * mult;
-				player.energy = newenergy;
-				opts.SavedEnergy = newenergy;
-			}
-			return true;
 		}
-	}*/
+	}
 	[HarmonyPatch(typeof(PlayerComponent))]
 	[HarmonyPatch("CheckEnergy")]
 	internal class PlayerComponent_CheckEnergy_Patcher {
 
 		[HarmonyPrefix]
 		public static bool Prefix(PlayerComponent __instance, ref float need_energy) {
-			if (need_energy == 0) {
-				return false;
+			if (need_energy != 0) {
+				Config.Options opts = Config.GetOptions();
+				float mult = need_energy > 0 ? opts.EnergyDrainMult : opts.EnergyReplenMult;
+				need_energy *= mult;
 			}
-			Config.Options opts = Config.GetOptions();
-			float mult = need_energy > 0 ? opts.EnergyDrainMult : opts.EnergyReplenMult;
-			need_energy *= mult;
 			return true;
 		}
 	}
@@ -47,12 +46,11 @@ namespace NotKeepersNeeds {
 
 		[HarmonyPrefix]
 		public static bool Prefix(PlayerComponent __instance, ref float need_energy) {
-			if (need_energy == 0) {
-				return false;
+			if (need_energy != 0) {
+				Config.Options opts = Config.GetOptions();
+				float mult = need_energy > 0 ? opts.EnergyDrainMult : opts.EnergyReplenMult;
+				need_energy *= mult;
 			}
-			Config.Options opts = Config.GetOptions();
-			float mult = need_energy > 0 ? opts.EnergyDrainMult : opts.EnergyReplenMult;
-			need_energy *= mult;
 			return true;
 		}
 	}
