@@ -58,6 +58,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Patchers\GameGUI_Patcher.cs" />
+    <Compile Include="Patchers\ItemDefinition_Patcher.cs" />
     <Compile Include="Patchers\HPActionComponent_Patcher.cs" />
     <Compile Include="Patchers\EnvironmentEngine_Patcher.cs" />
     <Compile Include="Patchers\ComponentsManager_Patcher.cs" />
